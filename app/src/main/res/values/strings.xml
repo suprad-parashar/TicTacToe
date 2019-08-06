@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Tic Tac Toe</string>
+    <string name="tie">Tie Game!</string>
+    <string name="blank">Blank Dot</string>
+    <string name="x_s_turn">X\'s Turn</string>
+    <string name="noob">Noob</string>
+    <string name="intermediate">Intermediate</string>
+    <string name="pro">Pro</string>
+    <string name="human">Human</string>
 </resources>
