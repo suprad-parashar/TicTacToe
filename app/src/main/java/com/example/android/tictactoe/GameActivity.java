@@ -2,18 +2,23 @@ package com.example.android.tictactoe;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
 
     boolean stateX = true;
-
+    private int level;
     private ImageView[] positions;
     private boolean[] isPlayed;
-    private TextView statusView;
+    private TextView statusView, messageView;
     private int[] boardState;
 
     @Override
@@ -24,6 +29,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         isPlayed = new boolean[9];
         boardState = new int[9];
         statusView = findViewById(R.id.game_status_display);
+        messageView = findViewById(R.id.game_message_display);
         positions = new ImageView[]{
                 findViewById(R.id.image11),
                 findViewById(R.id.image12),
@@ -36,6 +42,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 findViewById(R.id.image33)
         };
 
+        Intent intent = getIntent();
+        level = intent.getIntExtra("level",3);
+        if (level == 0) {
+            statusView.setText(getResources().getString(R.string.your_turn));
+        }
         for (ImageView image : positions)
             image.setOnClickListener(this);
     }
@@ -54,9 +65,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             statusView.setText(getString(R.string.tie));
         } else {
             stateX = !stateX;
+            if (level == 0 && !stateX) {
+                makeMove();
+            }
             String message = stateX ? "X's Turn" : "O's Turn";
             statusView.setText(message);
         }
+    }
+
+    private void makeMove() {
+        List<Integer> availablePositions = new ArrayList<>();
+        for (int i = 0; i < 9; i++)
+            if (boardState[i] == 0)
+                availablePositions.add(i);
+        int pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
+        makeMove(pos + 1);
     }
 
     private boolean checkTie() {
@@ -72,7 +95,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 boardState[3] * boardState[4] * boardState[5],
                 boardState[6] * boardState[7] * boardState[8],
                 boardState[0] * boardState[3] * boardState[6],
-                boardState[1] * boardState[4] * boardState[2],
+                boardState[1] * boardState[4] * boardState[7],
                 boardState[2] * boardState[5] * boardState[8],
                 boardState[0] * boardState[4] * boardState[8],
                 boardState[2] * boardState[4] * boardState[6]
@@ -87,77 +110,43 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.image11:
-                if (!isPlayed[0]) {
-                    positions[0].setImageResource(getImageWithState());
-                    boardState[0] = stateX ? 1 : 2;
-                    toggleState();
-                    isPlayed[0] = true;
-                }
+                makeMove(1);
                 break;
             case R.id.image12:
-                if (!isPlayed[1]) {
-                    boardState[1] = stateX ? 1 : 2;
-                    positions[1].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[1] = true;
-                }
+                makeMove(2);
                 break;
             case R.id.image13:
-                if (!isPlayed[2]) {
-                    boardState[2] = stateX ? 1 : 2;
-                    positions[2].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[2] = true;
-                }
+                makeMove(3);
                 break;
             case R.id.image21:
-                if (!isPlayed[3]) {
-                    boardState[3] = stateX ? 1 : 2;
-                    positions[3].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[3] = true;
-                }
+                makeMove(4);
                 break;
             case R.id.image22:
-                if (!isPlayed[4]) {
-                    boardState[4] = stateX ? 1 : 2;
-                    positions[4].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[4] = true;
-                }
+                makeMove(5);
                 break;
             case R.id.image23:
-                if (!isPlayed[5]) {
-                    boardState[5] = stateX ? 1 : 2;
-                    positions[5].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[5] = true;
-                }
+                makeMove(6);
                 break;
             case R.id.image31:
-                if (!isPlayed[6]) {
-                    boardState[6] = stateX ? 1 : 2;
-                    positions[6].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[6] = true;
-                }
+                makeMove(7);
                 break;
             case R.id.image32:
-                if (!isPlayed[7]) {
-                    boardState[7] = stateX ? 1 : 2;
-                    positions[7].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[7] = true;
-                }
+                makeMove(8);
                 break;
             case R.id.image33:
-                if (!isPlayed[8]) {
-                    boardState[8] = stateX ? 1 : 2;
-                    positions[8].setImageResource(getImageWithState());
-                    toggleState();
-                    isPlayed[8] = true;
-                }
+                makeMove(9);
                 break;
+        }
+    }
+
+    private void makeMove(int position) {
+        if (!isPlayed[position - 1]) {
+            positions[position - 1].setImageResource(getImageWithState());
+            boardState[position - 1] = stateX ? 1 : 2;
+            String message = (stateX ? "X" : "O") + " played at box " + position;
+            messageView.setText(message);
+            toggleState();
+            isPlayed[position - 1] = true;
         }
     }
 }
