@@ -12,6 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+class WinningTrio {
+    int a;
+    int b;
+    int c;
+
+    int getValue() {
+        return GameActivity.boardState[a] * GameActivity.boardState[b] * GameActivity.boardState[c];
+    }
+}
+
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
 
     boolean stateX = true;
@@ -19,15 +29,31 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView[] positions;
     private boolean[] isPlayed;
     private TextView statusView, messageView;
-    private int[] boardState;
+    private WinningTrio[] trios;
+    static public int[] boardState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        initVariables();
+        if (level != 3)
+            statusView.setText(getResources().getString(R.string.your_turn));
+    }
+
+    /**
+     * Initialises all the global variables and arrays.
+     */
+    private void initVariables() {
         isPlayed = new boolean[9];
+        trios = new WinningTrio[8];
+        for (int i = 0; i < 8; i++)
+            trios[i] = new WinningTrio();
+        initTrios();
         boardState = new int[9];
+        for (int i = 0; i < 9; i++)
+            boardState[i] = 2;
         statusView = findViewById(R.id.game_status_display);
         messageView = findViewById(R.id.game_message_display);
         positions = new ImageView[]{
@@ -41,67 +67,134 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 findViewById(R.id.image32),
                 findViewById(R.id.image33)
         };
-
-        Intent intent = getIntent();
-        level = intent.getIntExtra("level",3);
-        if (level == 0) {
-            statusView.setText(getResources().getString(R.string.your_turn));
-        }
         for (ImageView image : positions)
             image.setOnClickListener(this);
+        Intent intent = getIntent();
+        level = intent.getIntExtra("level", 3);
     }
 
+    /**
+     * Fetches the correct image based on whose turn it is to play.
+     *
+     * @return : The Image X or O based on the current state.
+     */
     private int getImageWithState() {
         return (stateX) ? R.drawable.x_image : R.drawable.o_image;
     }
 
+    /**
+     * Changes The State of the Player.
+     */
     private void toggleState() {
         if (checkWin()) {
-            for (int i = 0; i < 8; i++)
-                isPlayed[i] = true;
-            String message = stateX ? "X Won!" : "O Won!";
-            statusView.setText(message);
+            makeWin();
         } else if (checkTie()) {
             statusView.setText(getString(R.string.tie));
         } else {
             stateX = !stateX;
-            if (level == 0 && !stateX) {
-                makeMove();
-            }
             String message = stateX ? "X's Turn" : "O's Turn";
             statusView.setText(message);
         }
     }
 
+    /**
+     * Sets the Winner.
+     */
+    private void makeWin() {
+        for (int i = 0; i < 8; i++)
+            isPlayed[i] = true;
+        String message = stateX ? "X Won!" : "O Won!";
+        statusView.setText(message);
+    }
+
+    /**
+     * The Computer makes the move based on the level of gameplay.
+     */
     private void makeMove() {
-        List<Integer> availablePositions = new ArrayList<>();
-        for (int i = 0; i < 9; i++)
-            if (boardState[i] == 0)
-                availablePositions.add(i);
-        int pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
+        int pos = -1;
+        if (level == 0) {
+            //Assign Random Position.
+            List<Integer> availablePositions = new ArrayList<>();
+            for (int i = 0; i < 9; i++)
+                if (boardState[i] == 2)
+                    availablePositions.add(i);
+            pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
+        } else if (level == 1) {
+            //Check and Obtain the Winning Trio.
+            WinningTrio winningTrio = null;
+            for (WinningTrio trio : trios)
+                if (trio.getValue() == 18 || trio.getValue() == 50)
+                    winningTrio = trio;
+            //If Winning Trio exists, place a move to win/block.
+            if (winningTrio != null) {
+                if (boardState[winningTrio.a] == 2)
+                    pos = winningTrio.a;
+                else if (boardState[winningTrio.b] == 2)
+                    pos = winningTrio.b;
+                else
+                    pos = winningTrio.c;
+            } else {
+                //Choose a random Position.
+                List<Integer> availablePositions = new ArrayList<>();
+                for (int i = 0; i < 9; i++)
+                    if (boardState[i] == 2)
+                        availablePositions.add(i);
+                pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
+            }
+        }
         makeMove(pos + 1);
     }
 
+    /**
+     * Initialises the Winning Trios.
+     */
+    private void initTrios() {
+        trios[0].a = 0;
+        trios[0].b = 1;
+        trios[0].c = 2;
+        trios[1].a = 3;
+        trios[1].b = 4;
+        trios[1].c = 5;
+        trios[2].a = 6;
+        trios[2].b = 7;
+        trios[2].c = 8;
+        trios[3].a = 0;
+        trios[3].b = 3;
+        trios[3].c = 6;
+        trios[4].a = 1;
+        trios[4].b = 4;
+        trios[4].c = 7;
+        trios[5].a = 2;
+        trios[5].b = 5;
+        trios[5].c = 8;
+        trios[6].a = 0;
+        trios[6].b = 4;
+        trios[6].c = 8;
+        trios[7].a = 2;
+        trios[7].b = 4;
+        trios[7].c = 6;
+    }
+
+    /**
+     * Checks if a tie exists.
+     *
+     * @return : Returns true if the match is a draw or false otherwise.
+     */
     private boolean checkTie() {
         for (int i : boardState)
-            if (i == 0)
+            if (i == 2)
                 return false;
         return true;
     }
 
+    /**
+     * Checks if a player has won.
+     *
+     * @return : Returns true if a player has won or false otherwise.
+     */
     private boolean checkWin() {
-        int[] wins = {
-                boardState[0] * boardState[1] * boardState[2],
-                boardState[3] * boardState[4] * boardState[5],
-                boardState[6] * boardState[7] * boardState[8],
-                boardState[0] * boardState[3] * boardState[6],
-                boardState[1] * boardState[4] * boardState[7],
-                boardState[2] * boardState[5] * boardState[8],
-                boardState[0] * boardState[4] * boardState[8],
-                boardState[2] * boardState[4] * boardState[6]
-        };
-        for (int i : wins)
-            if (i == 1 || i == 8)
+        for (WinningTrio trio : trios)
+            if (trio.getValue() == 27 || trio.getValue() == 125)
                 return true;
         return false;
     }
@@ -139,14 +232,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Executes the Human Move.
+     *
+     * @param position : The Position of the move on the board.
+     */
     private void makeMove(int position) {
         if (!isPlayed[position - 1]) {
+            isPlayed[position - 1] = true;
             positions[position - 1].setImageResource(getImageWithState());
-            boardState[position - 1] = stateX ? 1 : 2;
+            boardState[position - 1] = stateX ? 3 : 5;
             String message = (stateX ? "X" : "O") + " played at box " + position;
             messageView.setText(message);
             toggleState();
-            isPlayed[position - 1] = true;
+            if (level != 3 && !stateX) {
+                makeMove();
+            }
         }
     }
 }
