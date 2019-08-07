@@ -111,7 +111,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * The Computer makes the move based on the level of gameplay.
      */
     private void makeMove() {
-        int pos = -1;
+        int pos;
         if (level == 0) {
             //Assign Random Position.
             List<Integer> availablePositions = new ArrayList<>();
@@ -122,9 +122,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         } else if (level == 1) {
             //Check and Obtain the Winning Trio.
             WinningTrio winningTrio = null;
-            for (WinningTrio trio : trios)
-                if (trio.getValue() == 18 || trio.getValue() == 50)
+            for (WinningTrio trio : trios) {
+                if (trio.getValue() == 50)
                     winningTrio = trio;
+            }
+            if (winningTrio == null) {
+                for (WinningTrio trio : trios)
+                    if (trio.getValue() == 18)
+                        winningTrio = trio;
+            }
             //If Winning Trio exists, place a move to win/block.
             if (winningTrio != null) {
                 if (boardState[winningTrio.a] == 2)
@@ -141,8 +147,89 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         availablePositions.add(i);
                 pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
             }
+        } else {
+            pos = getPositionForAI();
         }
         makeMove(pos + 1);
+    }
+
+    int getPositionForAI() {
+        int bestScore = -100;
+        int position = -1;
+        List<Integer> availablePositions = new ArrayList<>();
+        for (int i = 0; i < 9; i++)
+            if (boardState[i] == 2)
+                availablePositions.add(i);
+        for (int pos : availablePositions) {
+            boardState[pos] = 3;
+            isPlayed[pos] = true;
+            int score = getScoreForAI();
+            if (score > bestScore) {
+                bestScore = score;
+                position = pos;
+            }
+            isPlayed[pos] = false;
+            boardState[pos] = 2;
+        }
+        return position;
+    }
+
+    private int getScoreForAI() {
+        if (gradeBoard() == 10)
+            return 10;
+        else if (gradeBoard() == -10)
+            return -10;
+        else if (checkTie())
+            return 0;
+
+        if (stateX) {
+            int bestScore = -100;
+            List<Integer> availablePositions = new ArrayList<>();
+            for (int i = 0; i < 9; i++)
+                if (boardState[i] == 2)
+                    availablePositions.add(i);
+            for (int pos : availablePositions) {
+                boardState[pos] = 3;
+                isPlayed[pos] = true;
+                int score = getScoreForAI();
+                if (score > bestScore)
+                    bestScore = score;
+                isPlayed[pos] = false;
+                boardState[pos] = 2;
+            }
+            return bestScore;
+        } else {
+            int bestScore = 100;
+            List<Integer> availablePositions = new ArrayList<>();
+            for (int i = 0; i < 9; i++)
+                if (boardState[i] == 2)
+                    availablePositions.add(i);
+            for (int pos : availablePositions) {
+                boardState[pos] = 5;
+                isPlayed[pos] = true;
+                int score = getScoreForAI();
+                if (score < bestScore)
+                    bestScore = score;
+                isPlayed[pos] = false;
+                boardState[pos] = 2;
+            }
+            return bestScore;
+        }
+    }
+
+    private int gradeBoard() {
+        WinningTrio winningTrio = null;
+        for (WinningTrio trio : trios)
+            if (trio.getValue() == 27 || trio.getValue() == 125) {
+                winningTrio = trio;
+                break;
+            }
+        if (winningTrio == null)
+            return 0;
+        else if (winningTrio.getValue() == 27) {
+            return 10;
+        } else
+            return -10;
     }
 
     /**
