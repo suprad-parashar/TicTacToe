@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The WinningTrio class consists of the positions which constitutes the winning row, column or diagonal.
+ */
 class WinningTrio {
     int a;
     int b;
@@ -24,22 +27,25 @@ class WinningTrio {
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
 
-    boolean stateX = true;
-    private int level;
-    private ImageView[] positions;
-    private boolean[] isPlayed;
-    private TextView statusView, messageView;
-    private WinningTrio[] trios;
-    static public int[] boardState;
+    boolean stateX = true;      //A boolean which tells who's turn it is to play.
+    private int level;      //Specifies the difficulty of the opponent.
+    private ImageView[] positions;      //Stores the locations of the images in the positions of the board.
+    private boolean[] isPlayed;     //An array which tells us if a position has been played or not.
+    private TextView statusView, messageView;       //Two TextViews to update the statuses of the board.
+    private WinningTrio[] trios;        //The Winning trios.
+    static public int[] boardState;     //An array of integers which tells us the state of the board.
 
+    /**
+     * The Method which is called when the game is created.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
+        setContentView(R.layout.activity_game);     //Set the content of the screen to activity_game.xml
 
-        initVariables();
-        if (level != 3)
-            statusView.setText(getResources().getString(R.string.your_turn));
+        initVariables();        //Initialise all the variables.
+        if (level != 3)         //Check if the level is human or not.
+            statusView.setText(getResources().getString(R.string.your_turn));       //Set the text of the status view to "Your Turn" if the opponent is not a human.
     }
 
     /**
@@ -50,7 +56,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         trios = new WinningTrio[8];
         for (int i = 0; i < 8; i++)
             trios[i] = new WinningTrio();
-        initTrios();
+        initTrios();        //Initialise all the winning positions.
         boardState = new int[9];
         for (int i = 0; i < 9; i++)
             boardState[i] = 2;
@@ -70,7 +76,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         for (ImageView image : positions)
             image.setOnClickListener(this);
         Intent intent = getIntent();
-        level = intent.getIntExtra("level", 3);
+        level = intent.getIntExtra("level", 3);     //Get the Level of the game.
     }
 
     /**
@@ -112,14 +118,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void makeMove() {
         int pos;
-        if (level == 0) {
+        if (level == 0) {       //If the computer player is a noob.
             //Assign Random Position.
             List<Integer> availablePositions = new ArrayList<>();
             for (int i = 0; i < 9; i++)
                 if (boardState[i] == 2)
                     availablePositions.add(i);
             pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
-        } else if (level == 1) {
+        } else if (level == 1) {        //If the computer player is an intermediate player.
             //Check and Obtain the Winning Trio.
             WinningTrio winningTrio = null;
             for (WinningTrio trio : trios)
@@ -141,13 +147,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         availablePositions.add(i);
                 pos = availablePositions.get(new Random().nextInt(availablePositions.size()));
             }
-        } else {
+        } else {        //If the computer player is a pro.
             int bestScore = -9999;
             int position = -1;
+            //Get all the available positions.
             List<Integer> availablePositions = new ArrayList<>();
             for (int i = 0; i < 9; i++)
                 if (boardState[i] == 2)
                     availablePositions.add(i);
+            //Get all possible scores of the future boards.
             for (int p : availablePositions) {
                 boardState[p] = 5;
                 int score = getScoreForAI(true);
@@ -162,13 +170,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         makeMove(pos + 1);
     }
 
+    /**
+     * This method is used to obtain the score of the board for the AI.
+     * @param stateX : Is True if it's X's Turn, else false.
+     * @return : A score of the current board.
+     */
     private int getScoreForAI(boolean stateX) {
         int score = gradeBoard();
         if (score != 0)
             return score;
         else if (checkTie())
             return 0;
-        if (stateX) {
+        if (stateX) {       //Minimise Player's Score.
             int bestScore = 9999;
             List<Integer> availablePositions = new ArrayList<>();
             for (int i = 0; i < 9; i++)
@@ -182,7 +195,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 boardState[pos] = 2;
             }
             return bestScore;
-        } else {
+        } else {        //Maximise Computer's Score.
             int bestScore = -9999;
             List<Integer> availablePositions = new ArrayList<>();
             for (int i = 0; i < 9; i++)
@@ -199,6 +212,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Assigns score to a board.
+     * @return : +10 if O Wins, -10 is X Wins, 0 otherwise.
+     */
     private int gradeBoard() {
         for (WinningTrio trio : trios) {
             if (trio.getValue() == 27)
@@ -263,6 +280,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         return false;
     }
 
+    /**
+     * Performs tasks if something is clicked.
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
