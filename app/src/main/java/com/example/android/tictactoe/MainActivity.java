@@ -14,11 +14,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Add Buttons for selecting different levels of gameplay.
         Button noobButton, intermediateButton, proButton, humanButton;
         noobButton = findViewById(R.id.noob_button);
         intermediateButton = findViewById(R.id.intermediate_button);
         proButton = findViewById(R.id.pro_button);
         humanButton = findViewById(R.id.human_button);
+        
+        //Logic for Level 0 button.
         noobButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        //Logic for Level 1 button.
         intermediateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        //Logic for Level 2 button.
         proButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        //Logic for Level 3 button.
         humanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
