@@ -20,6 +20,7 @@ class WinningTrio {
     int b;
     int c;
 
+    //Returns the value of the trio in question.
     int getValue() {
         return GameActivity.boardState[a] * GameActivity.boardState[b] * GameActivity.boardState[c];
     }
@@ -230,27 +231,35 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * Initialises the Winning Trios.
      */
     private void initTrios() {
+        //First Row
         trios[0].a = 0;
         trios[0].b = 1;
         trios[0].c = 2;
+        //Second Row
         trios[1].a = 3;
         trios[1].b = 4;
         trios[1].c = 5;
+        //Third Row
         trios[2].a = 6;
         trios[2].b = 7;
         trios[2].c = 8;
+        //First Column
         trios[3].a = 0;
         trios[3].b = 3;
         trios[3].c = 6;
+        //Second Column
         trios[4].a = 1;
         trios[4].b = 4;
         trios[4].c = 7;
+        //Third Column
         trios[5].a = 2;
         trios[5].b = 5;
         trios[5].c = 8;
+        //Primary Diagonal
         trios[6].a = 0;
         trios[6].b = 4;
         trios[6].c = 8;
+        //Secondary Diagonal
         trios[7].a = 2;
         trios[7].b = 4;
         trios[7].c = 6;
